@@ -3,7 +3,7 @@ namespace Appointment\Model;
 
 use Zend\Db\TableGateway\TableGateway;
 
-class AppointmentTable{
+class AppointmentsTable{
     protected $tableGateway;
     public function __construct(TableGateway $tableGateway)
     {

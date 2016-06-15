@@ -1,5 +1,5 @@
 <?php
-return array(
+return [
     'controllers' => [
         'invokables' =>[
             'Appointment\Controller\Appointment' => 'Appointment\Controller\AppointmentController'
@@ -16,10 +16,15 @@ return array(
                         'id' => '[0-9]*'
                     ],
                     'defaults' =>[
-                        'controller' => 'Appointment\Controller\appointment'
+                        'controller' => 'Appointment\Controller\Appointment'
                     ]
                 ]
             ]
         ]
-    ]
-);
+    ],
+    'view_manager' => [
+        'strategies' => [
+            'ViewJsonStrategy',
+        ]
+    ],
+];
