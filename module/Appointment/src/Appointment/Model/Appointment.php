@@ -1,129 +1,65 @@
 <?php
 namespace Appointment\Model;
 
-use Zend\InputFilter\InputFilter;
-use Zend\InputFilter\InputFilterAwareInterface;
-use Zend\InputFilter\InputFilterInterface;
-class Appointment implements InputFilterAwareInterface{
+use Zend\Validator;
+use Zend\Validator\Date;
+use Zend\Validator\StringLength;
+use Zend\Validator\ValidatorInterface;
+
+class Appointment implements ValidatorInterface{
 
     public $id;
     public $username;
     public $reason;
     public $start_time;
     public $end_time;
-    protected $inputFilter;
+    public $messages;
 
     public function exchangeArray($data) {
 
         $this->id = (!empty($data['id'])) ? $data['id'] : null;
 
-        $this->name = (!empty($data['username'])) ? $data['username'] : null;
+        $this->username = (!empty($data['username'])) ? $data['username'] : null;
 
-        $this->email = (!empty($data['reason'])) ? $data['reason'] : null;
+        $this->reason = (!empty($data['reason'])) ? $data['reason'] : null;
 
-        $this->mobile = (!empty($data['start_time'])) ? $data['start_time'] : null;
+        $this->start_time = (!empty($data['start_time'])) ? $data['start_time'] : null;
 
-        $this->address = (!empty($data['end_time'])) ? $data['end_time'] : null;
+        $this->end_time = (!empty($data['end_time'])) ? $data['end_time'] : null;
     }
 
     public function getArrayCopy(){
         return get_object_vars($this);
     }
 
-    public function setInputFilter(InputFilterInterface $inputFilter)
+    public function isValid($data)
     {
-        throw new \Exception("Not used");
-    }
+        $this->exchangeArray($data);
+        $stringValidator = new StringLength(1);
 
-    public function getInputFilter()
-    {
-        if (!$this->inputFilter){
-            $inputFilter = new InputFilter();
+        $stringValidator->setMessage(
+            'The string \'%value%\' is too short; it must be at least %min% ' .
+            'characters',
+            StringLength::TOO_SHORT);
 
-            $inputFilter->add([
-               'name' => 'id',
-                'required' => true,
-                'filter'  => [
-                    [
-                        'name'=> 'Int'
-                    ]
-                ]
-            ]);
-
-            $inputFilter->add([
-                'name' => 'username',
-                'required' => true,
-                'filter'  => [
-                    [
-                        'name'=> 'StripTags'
-                    ],
-                    [
-                        'name'=>'StringTrim'
-                    ]
-                ],
-                'validator' => [
-                    [
-                        'name' => 'StringLength',
-                        'options' => [
-                            'encoding' => 'UTF-8',
-                            'min'       => 1,
-                            'max'       => 200,
-                        ]
-                    ]
-                ]
-            ]);
-            $inputFilter->add([
-                'name' => 'reason',
-                'required' => true,
-                'filter'  => [
-                    [
-                        'name'=> 'StripTags'
-                    ],
-                    [
-                        'name'=>'StringTrim'
-                    ]
-                ],
-                'validator' => [
-                    [
-                        'name' => 'StringLength',
-                        'options' => [
-                            'encoding' => 'UTF-8',
-                            'min'       => 1,
-                            'max'       => 200,
-                        ]
-                    ]
-                ]
-            ]);
-            $inputFilter->add([
-                'type' => 'Zend\Form\Element\DateTime',
-                'name' => 'start_time',
-                'required' => true,
-                'options' => [
-                    'label' => 'Appointment Date/Time',
-                    'format' => 'Y-m-d\TH:iP'
-                ],
-                'attributes' => [
-                    'min' => '2016-01-01T00:00:00Z',
-                    'max' => '2020-01-01T00:00:00Z',
-                    'step' => '1', // minutes; default step interval is 1 min
-                ]
-            ]);
-            $inputFilter->add([
-                'type' => 'Zend\Form\Element\DateTime',
-                'name' => 'end_time',
-                'required' => false,
-                'options' => [
-                    'label' => 'Appointment Date/Time',
-                    'format' => 'Y-m-d\TH:iP'
-                ],
-                'attributes' => [
-                    'min' => '2016-01-01T00:00:00Z',
-                    'max' => '2020-01-01T00:00:00Z',
-                    'step' => '1', // minutes; default step interval is 1 min
-                ]
-            ]);
-            $this->inputFilter = $inputFilter;
+        if (!$stringValidator->isValid($this->username)){
+            $this->messages[] = $stringValidator->getMessages();
         }
-        return $this->inputFilter;
+        if (!$stringValidator->isValid($this->reason)){
+            $this->messages[] = $stringValidator->getMessages();
+        }
+        $dateValidator = new Date();
+        if (!$dateValidator->isValid($this->start_time)){
+            $this->messages[] = $dateValidator->getMessages();
+        }
+        if (isEmpty($this->messages)){
+            return true;
+        }
+        return false;
     }
+    public function getMessages()
+    {
+        return $this->messages;
+    }
+
 }

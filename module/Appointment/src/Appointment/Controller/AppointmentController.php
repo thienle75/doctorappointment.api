@@ -2,33 +2,43 @@
 namespace Appointment\Controller;
 
 use Appointment\Model\Appointment;
-use Appointment\Model\AppointmentsTable;
 
 use Zend\Mvc\Controller\AbstractRestfulController;
+use Zend\View\Model\JsonModel;
 
 Class AppointmentController extends AbstractRestfulController{
     protected $appointmentTable;
 
     public function getList()
     {
-        return ['users' => $this->getUsersTable()];
+        return ['Appointments' => $this->getAppointmentsTable()->fetchAll()];
     }
 
     public function create($data)
     {
-
+        $appointment = new Appointment();
+        if ($appointment->isValid($data)){
+            return $this->getAppointmentsTable()->saveAppointment($appointment);
+        }
+        
     }
 
     public function update($id,$data)
     {
-
+        $appointment = new Appointment();
+        if ($appointment->isValid($data)){
+            return $this->getAppointmentsTable()->saveAppointment($appointment);
+        }
     }
 
     public function delete($id)
     {
-
+        $this->getAppointmentsTable()->deleteAppointment($id);
+        return new JsonModel(array(
+            'Appointment' => 'deleted',
+        ));
     }
-    public function getUsersTable() {
+    public function getAppointmentsTable() {
 
         if (!$this->appointmentTable) {
 
@@ -39,6 +49,6 @@ Class AppointmentController extends AbstractRestfulController{
 
         return $this->appointmentTable;
     }
-    
+
 
 }
